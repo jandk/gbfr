@@ -19,7 +19,10 @@ public final class Archive implements AutoCloseable {
     public ByteBuffer read(ChunkEntry entry) {
         System.out.println("Reading " + entry.size() + " bytes at " + entry.fileOffset());
         try {
-            var buffer = ByteBuffer.allocate(entry.size());
+            var buffer = ByteBuffer
+                .allocate(entry.size())
+                .order(ByteOrder.LITTLE_ENDIAN);
+
             channel.position(entry.fileOffset());
             channel.read(buffer);
 
@@ -30,10 +33,12 @@ public final class Archive implements AutoCloseable {
                     .safeDecompressor()
                     .decompress(buffer.array(), uncompressed);
 
-                return ByteBuffer.wrap(uncompressed);
+                return ByteBuffer
+                    .wrap(uncompressed)
+                    .order(ByteOrder.LITTLE_ENDIAN);
             }
 
-            return buffer;
+            return buffer.flip();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

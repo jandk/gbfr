@@ -1,7 +1,7 @@
 package be.twofold.gbfr;
 
 import be.twofold.gbfr.data.*;
-import net.jpountz.xxhash.*;
+import be.twofold.gbfr.gts.*;
 
 import java.io.*;
 import java.nio.*;
@@ -9,7 +9,7 @@ import java.nio.file.*;
 import java.util.*;
 
 public class Main {
-    private static final List<String> Files = List.of(
+    private static final List<String> GtsFiles = List.of(
         "granite/2k/gts/0/0.gts",
         "granite/2k/gts/1/1.gts",
         "granite/2k/gts/2/2.gts",
@@ -29,8 +29,16 @@ public class Main {
     public static void main(String[] args) throws IOException {
         var main = load(Path.of(args[0]));
 
-        for (var file : Files) {
+        for (var file : GtsFiles) {
             var buffer = main.readFile(file);
+
+            var gts = Gts.read(buffer);
+
+
+
+//            Path path = Path.of(file);
+//            Files.createDirectories(path.getParent());
+//            Files.write(path, buffer.array());
         }
     }
 
