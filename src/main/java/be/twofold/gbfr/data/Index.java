@@ -1,6 +1,7 @@
 package be.twofold.gbfr.data;
 
 import be.twofold.gbfr.*;
+import net.jpountz.xxhash.*;
 
 import java.io.*;
 import java.nio.*;
@@ -16,6 +17,7 @@ public record Index(
     long[] externalFilesSizesTable,
     int[] cachedChunkIndicesTable
 ) {
+    private static final XXHash64 XxHash64 = XXHashFactory.safeInstance().hash64();
 
     public static Index read(Path path) throws IOException {
         var buffer = ByteBuffer
@@ -147,5 +149,17 @@ public record Index(
             cachedChunkIndicesTable[i] = buffer.getInt();
         }
         return cachedChunkIndicesTable;
+    }
+
+    public ChunkEntry getEntry(String file) {
+        var hash = XxHash64.hash(ByteBuffer.wrap(file.getBytes()), 0);
+
+        var entry = ArrayUtils.indexOf(archiveFilesHashTable, hash);
+        if (entry < 0) {
+            throw new IllegalArgumentException("File not found: " + file);
+        }
+
+        var chunkIndex = fileToChunkIndicesTable[entry];
+        return chunkEntryTable[chunkIndex.chunkEntryIndex()];
     }
 }
