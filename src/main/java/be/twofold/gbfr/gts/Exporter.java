@@ -27,10 +27,13 @@ public final class Exporter {
         var textures = mapTextures();
 
         for (Texture texture : textures) {
-            int tileX = texture.offsetX() / 128;
-            int tileY = texture.offsetY() / 128;
-            int tileWidth = Math.divideExact(texture.width(), 128);
-            int tileHeight = Math.divideExact(texture.height(), 128);
+            int usableX = gts.header().tileWidth() - 16;
+            int usableY = gts.header().tileHeight() - 16;
+
+            int tileX = texture.offsetX() / usableX;
+            int tileY = texture.offsetY() / usableY;
+            int tileWidth = Math.divideExact(texture.width(), usableX);
+            int tileHeight = Math.divideExact(texture.height(), usableY);
 
             var outputPath = destination.resolve(texture.name().trim() + ".png");
             if(Files.exists(outputPath)) {
@@ -47,26 +50,26 @@ public final class Exporter {
         var numLayers = gts.header().numLayers();
         var level = gts.levels().getFirst();
 
-        var tw = 128;
-        var th = 128;
+        var usableX = gts.header().tileWidth() - 16;
+        var usableY = gts.header().tileHeight() - 16;
 
-        var totalWidth = tw * tileWidth;
-        var totalHeight = th * tileHeight;
+        var totalWidth = usableX * tileWidth;
+        var totalHeight = usableY * tileHeight;
         var total = new byte[totalWidth * totalHeight * 4];
 
         for (var y = 0; y < tileHeight; y++) {
-            var yy = y * th;
+            var yy = y * usableY;
             for (var x = 0; x < tileWidth; x++) {
-                var xx = x * tw * 4;
+                var xx = x * usableX * 4;
 
                 var tileIndex = gts.tileIndices()[0][(tileY + y) * level.tileWidth() * numLayers + (tileX + x) * numLayers];
                 var tile = readTile(tileIndex);
 
-                for (var ty = 0; ty < th; ty++) {
+                for (var ty = 0; ty < usableY; ty++) {
                     var totalOffset = (yy + ty) * totalWidth * 4 + xx;
                     var tileOffset = ((ty + 8) * getTileWidth() + 8) * 4;
 
-                    System.arraycopy(tile, tileOffset, total, totalOffset, tw * 4);
+                    System.arraycopy(tile, tileOffset, total, totalOffset, usableX * 4);
                 }
             }
         }
