@@ -10,9 +10,9 @@ import java.util.*;
 
 public class Main {
     private static final List<String> GtsFiles = List.of(
-        "granite/2k/gts/0/0.gts",
-        "granite/2k/gts/1/1.gts",
-        "granite/2k/gts/2/2.gts",
+        // "granite/2k/gts/0/0.gts",
+        // "granite/2k/gts/1/1.gts",
+        // "granite/2k/gts/2/2.gts",
         "granite/4k/gts/0/0.gts",
         "granite/4k/gts/1/1.gts",
         "granite/4k/gts/2/2.gts"
@@ -35,14 +35,6 @@ public class Main {
             var gts = Gts.read(file, buffer);
             var exporter = new Exporter(gts, main::readFile);
             exporter.export();
-
-            if (true) {
-                break;
-            }
-
-//            Path path = Path.of(file);
-//            Files.createDirectories(path.getParent());
-//            Files.write(path, buffer.array());
         }
     }
 
