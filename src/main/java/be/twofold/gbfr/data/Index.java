@@ -1,6 +1,6 @@
 package be.twofold.gbfr.data;
 
-import be.twofold.gbfr.*;
+import be.twofold.gbfr.util.*;
 import net.jpountz.xxhash.*;
 
 import java.io.*;

@@ -1,4 +1,4 @@
-package be.twofold.gbfr;
+package be.twofold.gbfr.util;
 
 public final class ArrayUtils {
 

@@ -1,8 +1,9 @@
-package be.twofold.gbfr.gts;
+package be.twofold.gbfr;
 
 import be.twofold.gbfr.decoder.*;
 import be.twofold.gbfr.encoder.*;
 import be.twofold.gbfr.fastlz.*;
+import be.twofold.gbfr.gts.*;
 
 import java.io.*;
 import java.nio.*;
@@ -21,12 +22,14 @@ public final class Exporter {
         this.reader = reader;
     }
 
-    public void export() throws IOException {
-        var destination = Path.of("out");
-        Files.createDirectories(destination);
+    public void export(Path outPath) throws IOException {
+        Files.createDirectories(outPath);
         var textures = mapTextures();
 
         for (Texture texture : textures) {
+//            if(!texture.name().contains("ec352ea4742ad2719335cce23c7a4ebdb1dede431c226c3eaa05ef269390d6a6")){
+//                continue;
+//            }
             int usableX = gts.header().tileWidth() - 16;
             int usableY = gts.header().tileHeight() - 16;
 
@@ -35,18 +38,21 @@ public final class Exporter {
             int tileWidth = Math.divideExact(texture.width(), usableX);
             int tileHeight = Math.divideExact(texture.height(), usableY);
 
-            var outputPath = destination.resolve(texture.name().trim() + ".png");
-            if(Files.exists(outputPath)) {
-                continue;
-            }
 
             if (tileWidth != 0 && tileHeight != 0) {
-                extractTile(tileX, tileY, tileWidth, tileHeight, outputPath);
+                for (int layer = 0; layer < gts.header().numLayers(); layer++) {
+                    var outputPath = outPath.resolve(texture.name().trim() + "." + layer + ".png");
+                    if (Files.exists(outputPath)) {
+                        continue;
+                    }
+
+                    extractTile(tileX, tileY, tileWidth, tileHeight, outputPath, layer);
+                }
             }
         }
     }
 
-    private void extractTile(int tileX, int tileY, int tileWidth, int tileHeight, Path outputPath) throws IOException {
+    private void extractTile(int tileX, int tileY, int tileWidth, int tileHeight, Path outputPath, int layer) throws IOException {
         var numLayers = gts.header().numLayers();
         var level = gts.levels().getFirst();
 
@@ -62,7 +68,7 @@ public final class Exporter {
             for (var x = 0; x < tileWidth; x++) {
                 var xx = x * usableX * 4;
 
-                var tileIndex = gts.tileIndices()[0][(tileY + y) * level.tileWidth() * numLayers + (tileX + x) * numLayers];
+                var tileIndex = gts.tileIndices()[0][(tileY + y) * level.tileWidth() * numLayers + (tileX + x) * numLayers + layer];
                 var tile = readTile(tileIndex);
 
                 for (var ty = 0; ty < usableY; ty++) {
@@ -95,10 +101,18 @@ public final class Exporter {
         var pageFile = gts.pageFiles().get(tile.pageIndex());
         var basePath = gts.name().substring(0, gts.name().lastIndexOf('.') - 1);
         var path = basePath + pageFile.name();
+
+        if (gtpCache.size() > 100) {
+            gtpCache.clear();
+        }
         var gtp = gtpCache.computeIfAbsent(path, p -> {
             var apply = reader.apply(p);
             return Gtp.read(apply);
         });
+
+        if(gtp == null){
+            return new byte[getTileWidth() * getTileHeight() * 4];
+        }
 
         var chunk = gtp.chunks()
             .get(tile.pageChunk())
@@ -107,8 +121,12 @@ public final class Exporter {
     }
 
     private byte[] decodeTile(GtpChunk chunk) {
+        if (chunk.data().length <= 4) {
+            return new byte[getTileWidth() * getTileHeight() * 4];
+        }
         if (chunk.compression() == 9) {
-            FastLz.decompress(chunk.data(), decodeBuffer);
+            int done = FastLz.decompress(chunk.data(), decodeBuffer);
+            // System.out.println(done);
         }
 
         var parameterBlockIndex = findParameterBlockIndex(chunk);

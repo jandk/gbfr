@@ -1,4 +1,4 @@
-package be.twofold.gbfr;
+package be.twofold.gbfr.data;
 
 import be.twofold.gbfr.data.*;
 import net.jpountz.lz4.*;

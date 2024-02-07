@@ -1,4 +1,4 @@
-package be.twofold.gbfr;
+package be.twofold.gbfr.util;
 
 import java.nio.*;
 import java.nio.charset.*;

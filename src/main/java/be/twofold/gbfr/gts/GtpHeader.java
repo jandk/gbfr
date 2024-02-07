@@ -1,6 +1,6 @@
 package be.twofold.gbfr.gts;
 
-import be.twofold.gbfr.*;
+import be.twofold.gbfr.util.*;
 
 import java.nio.*;
 

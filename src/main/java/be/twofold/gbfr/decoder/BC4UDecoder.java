@@ -1,5 +1,7 @@
 package be.twofold.gbfr.decoder;
 
+import be.twofold.gbfr.util.*;
+
 public final class BC4UDecoder extends BCDecoder {
     private final int rOff;
 

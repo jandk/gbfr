@@ -1,10 +1,10 @@
 package be.twofold.gbfr.gts;
 
-import be.twofold.gbfr.*;
+import be.twofold.gbfr.util.*;
 
 import java.nio.*;
 
-record GtpChunk(
+public record GtpChunk(
     int compression,
     int parameterId,
     int size,

@@ -1,16 +1,19 @@
 package be.twofold.gbfr.gts;
 
-import be.twofold.gbfr.*;
+import be.twofold.gbfr.util.*;
 
 import java.nio.*;
 import java.util.*;
 
-record Gtp(
+public record Gtp(
     GtpHeader header,
     List<List<GtpChunk>> chunks
 ) {
     public static Gtp read(ByteBuffer buffer) {
         var header = GtpHeader.read(buffer);
+        if(header.magic() != 0x50415247) {
+            return null;
+        }
 
         int numBlocks = (buffer.limit() + 0x7ffff) / 0x80000;
 

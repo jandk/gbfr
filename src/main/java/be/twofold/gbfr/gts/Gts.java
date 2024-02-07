@@ -1,11 +1,12 @@
 package be.twofold.gbfr.gts;
 
-import be.twofold.gbfr.*;
+import be.twofold.gbfr.util.*;
 
 import java.io.*;
 import java.lang.reflect.*;
 import java.nio.*;
 import java.util.*;
+import java.util.stream.*;
 
 public record Gts(
     String name,
@@ -54,7 +55,36 @@ public record Gts(
 
         // Files.write(Path.of("/home/jan/flatTiles.csv"), toCsv(GtsFlatTile.class, flatTiles).getBytes());
 
+        var group = Arrays.stream(parameterBlockData)
+            .collect(Collectors.groupingBy(a -> a.length, Collectors.toList()));
+
+        Set<ByteArray> unique = new HashSet<>();
+        for (List<byte[]> value : group.values()) {
+            for (byte[] bytes : value) {
+                unique.add(new ByteArray(bytes));
+            }
+        }
+
         return new Gts(name, header, meta, levels, pageFiles, flatTiles, tileIndices, parameterBlocks, parameterBlockData);
+    }
+
+    private static final class ByteArray{
+        private final byte[] array;
+
+        private ByteArray(byte[] array) {
+            this.array = array;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof ByteArray byteArray
+                && Arrays.equals(array, byteArray.array);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(array);
+        }
     }
 
     public static <T> String toCsv(Class<T> clazz, List<T> list) {

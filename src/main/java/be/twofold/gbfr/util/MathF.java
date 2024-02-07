@@ -1,4 +1,4 @@
-package be.twofold.gbfr.decoder;
+package be.twofold.gbfr.util;
 
 public final class MathF {
     public static final float SQRT_2 = 1.4142135f;

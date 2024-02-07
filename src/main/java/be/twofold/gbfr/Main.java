@@ -33,8 +33,9 @@ public class Main {
             var buffer = main.readFile(file);
 
             var gts = Gts.read(file, buffer);
+            System.out.println(gts.header());
             var exporter = new Exporter(gts, main::readFile);
-            exporter.export();
+            exporter.export(Path.of(args[1]).resolve(Path.of(file).getParent().getFileName()));
         }
     }
 

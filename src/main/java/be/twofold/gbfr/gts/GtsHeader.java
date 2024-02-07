@@ -1,6 +1,6 @@
 package be.twofold.gbfr.gts;
 
-import be.twofold.gbfr.*;
+import be.twofold.gbfr.util.*;
 
 import java.nio.*;
 
@@ -14,6 +14,8 @@ public record GtsHeader(
     long levelsOffset,
     int tileWidth,
     int tileHeight,
+    int tileBorder,
+    int tileMaxSize,
     int numFlatTiles,
     long flatTilesOffset,
     int numReverseTiles,
@@ -38,8 +40,8 @@ public record GtsHeader(
         long levelsOffset = buffer.getLong();
         int tileWidth = buffer.getInt();
         int tileHeight = buffer.getInt();
-        buffer.getInt(); // unknown
-        buffer.getInt(); // unknown
+        var tileBorder = buffer.getInt();
+        var tileMaxSize = buffer.getInt();
         int numFlatTiles = buffer.getInt();
         long flatTilesOffset = buffer.getLong();
         buffer.getInt(); // unknown
@@ -72,6 +74,8 @@ public record GtsHeader(
             levelsOffset,
             tileWidth,
             tileHeight,
+            tileBorder,
+            tileMaxSize,
             numFlatTiles,
             flatTilesOffset,
             numReverseTiles,

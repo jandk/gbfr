@@ -1,5 +1,7 @@
 package be.twofold.gbfr.decoder;
 
+import be.twofold.gbfr.util.*;
+
 public final class NormalDecoder extends BCDecoder {
     private static final byte[] Lut = initializeLut();
 
