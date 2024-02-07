@@ -54,8 +54,8 @@ public final class PngOutputStream implements AutoCloseable {
         for (int y = 0; y < format.height(); y++) {
             writeRow(image, y * format.bytesPerRow());
         }
-        System.out.printf("Filter counts - None: %d, Sub: %d, Up: %d, Average: %d, Paeth: %d%n",
-            filterCounts[0], filterCounts[1], filterCounts[2], filterCounts[3], filterCounts[4]);
+//        System.out.printf("Filter counts - None: %d, Sub: %d, Up: %d, Average: %d, Paeth: %d%n",
+//            filterCounts[0], filterCounts[1], filterCounts[2], filterCounts[3], filterCounts[4]);
     }
 
     private void writeRow(byte[] image, int offset) throws IOException {
