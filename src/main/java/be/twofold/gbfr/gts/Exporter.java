@@ -22,7 +22,7 @@ public final class Exporter {
     }
 
     public void export() throws IOException {
-        var destination = Path.of("/home/jan/output/");
+        var destination = Path.of("out");
         Files.createDirectories(destination);
         var textures = mapTextures();
 
