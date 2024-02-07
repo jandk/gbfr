@@ -6,16 +6,16 @@ import java.nio.*;
 
 record GtpChunk(
     int compression,
-    int magicMaybe,
+    int parameterId,
     int size,
     byte[] data
 ) {
     public static GtpChunk read(ByteBuffer buffer) {
-        var versionMaybe = buffer.getInt();
-        var magicMaybe = buffer.getInt();
+        var compression = buffer.getInt();
+        var parameterId = buffer.getInt();
         var size = buffer.getInt();
         var data = IOUtils.readBytes(buffer, size);
 
-        return new GtpChunk(versionMaybe, magicMaybe, size, data);
+        return new GtpChunk(compression, parameterId, size, data);
     }
 }

@@ -11,8 +11,6 @@ import java.util.*;
 import java.util.function.*;
 
 public final class Exporter {
-    private static final BCDecoder decoder = new BC5UDecoder(false);
-
     private final byte[] decodeBuffer = new byte[100 * 1024];
 
     private final Gts gts;
@@ -24,6 +22,7 @@ public final class Exporter {
     }
 
     public void export() throws IOException {
+        int numLayers = gts.header().numLayers();
         var basePath = gts.name().substring(0, gts.name().lastIndexOf('.') - 1);
         var textures = mapTextures();
 
@@ -31,8 +30,8 @@ public final class Exporter {
         int levelIndex = 0;
         GtsLevelInfo level = gts.levels().get(levelIndex);
 
-        int ltw = 20;
-        int lth = 20;
+        int ltw = 64;
+        int lth = 64;
 
         var totalWidth = getTileWidth() * ltw;
         var totalHeight = getTileHeight() * lth;
@@ -43,7 +42,7 @@ public final class Exporter {
             for (int x = 0; x < ltw; x++) {
                 int xx = x * getTileWidth() * 4;
 
-                int tileIndex = gts.tileIndices()[levelIndex][y * ltw + x];
+                int tileIndex = gts.tileIndices()[levelIndex][y * level.tileWidth() * numLayers + x * numLayers];
                 byte[] tile = readTile(tileIndex);
 
                 for (int ty = 0; ty < getTileHeight(); ty++) {
@@ -92,8 +91,28 @@ public final class Exporter {
             FastLz.decompress(chunk.data(), decodeBuffer);
         }
 
+        int parameterBlockIndex = findParameterBlockIndex(chunk);
+        byte[] bytes = gts.parameterBlockData()[parameterBlockIndex];
+
+        String codec = bytes.length < 48 ? "BC7" : new String(bytes, 44, 3);
+        BCDecoder bcDecoder = switch (codec) {
+            case "BC5" -> new BC5UDecoder(false);
+            case "BC7" -> new BC7Decoder();
+            default -> throw new IllegalArgumentException("Unknown codec: " + codec);
+        };
+
         var bcBuffer = Arrays.copyOf(decodeBuffer, getTileWidth() * getTileHeight());
-        return decoder.decode(bcBuffer, getTileWidth(), getTileHeight());
+        return bcDecoder.decode(bcBuffer, getTileWidth(), getTileHeight());
+    }
+
+    private int findParameterBlockIndex(GtpChunk chunk) {
+        var gtsParameterBlocks = gts.parameterBlocks();
+        for (int i = 0; i < gtsParameterBlocks.size(); i++) {
+            if (gtsParameterBlocks.get(i).id() == chunk.parameterId()) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private List<Texture> mapTextures() {
