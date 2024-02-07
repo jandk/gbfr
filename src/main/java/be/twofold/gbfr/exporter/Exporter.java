@@ -52,7 +52,7 @@ public final class Exporter {
                     fileName = fileName.substring(fileName.lastIndexOf('\\') + 1);
                     fileName = fileName.substring(0, fileName.lastIndexOf('.'));
 
-                    var outputPath = outPath.resolve(fileName + ".png");
+                    var outputPath = outPath.resolve(fileName + ".tga");
                     if (!Files.exists(outputPath.getParent())) {
                         Files.createDirectories(outputPath.getParent());
                     }
@@ -109,10 +109,11 @@ public final class Exporter {
             }
         }
 
-        var format = new PngFormat(totalWidth, totalHeight, PngColorType.RgbAlpha);
-        try (var out = new PngOutputStream(Files.newOutputStream(outputPath), format)) {
-            out.writeImage(total);
-        }
+        TgaWriter.writeTga(outputPath, total, totalWidth, totalHeight);
+//        var format = new PngFormat(totalWidth, totalHeight, PngColorType.RgbAlpha);
+//        try (var out = new PngOutputStream(Files.newOutputStream(outputPath), format)) {
+//            out.writeImage(total);
+//        }
     }
 
     private int getTileHeight() {
