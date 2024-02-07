@@ -4,10 +4,10 @@ import java.util.*;
 
 public record Texture(
     String name,
-    short width,
-    short height,
-    short offsetX,
-    short offsetY,
+    int width,
+    int height,
+    int offsetX,
+    int offsetY,
     String address,
     int[] srgb,
     UUID[] thumbnail

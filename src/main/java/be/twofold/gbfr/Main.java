@@ -62,5 +62,4 @@ public class Main {
         var archive = archives.get(chunkEntry.dataFileNumber());
         return archive.read(chunkEntry);
     }
-
 }

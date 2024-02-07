@@ -22,40 +22,57 @@ public final class Exporter {
     }
 
     public void export() throws IOException {
-        int numLayers = gts.header().numLayers();
-        var basePath = gts.name().substring(0, gts.name().lastIndexOf('.') - 1);
+        var destination = Path.of("/home/jan/output/");
+        Files.createDirectories(destination);
         var textures = mapTextures();
 
+        for (Texture texture : textures) {
+            int tileX = texture.offsetX() / 128;
+            int tileY = texture.offsetY() / 128;
+            int tileWidth = Math.divideExact(texture.width(), 128);
+            int tileHeight = Math.divideExact(texture.height(), 128);
 
-        int levelIndex = 0;
-        GtsLevelInfo level = gts.levels().get(levelIndex);
+            var outputPath = destination.resolve(texture.name().trim() + ".png");
+            if(Files.exists(outputPath)) {
+                continue;
+            }
 
-        int ltw = 64;
-        int lth = 64;
+            if (tileWidth != 0 && tileHeight != 0) {
+                extractTile(tileX, tileY, tileWidth, tileHeight, outputPath);
+            }
+        }
+    }
 
-        var totalWidth = getTileWidth() * ltw;
-        var totalHeight = getTileHeight() * lth;
+    private void extractTile(int tileX, int tileY, int tileWidth, int tileHeight, Path outputPath) throws IOException {
+        var numLayers = gts.header().numLayers();
+        var level = gts.levels().getFirst();
+
+        var tw = 128;
+        var th = 128;
+
+        var totalWidth = tw * tileWidth;
+        var totalHeight = th * tileHeight;
         var total = new byte[totalWidth * totalHeight * 4];
 
-        for (int y = 0; y < lth; y++) {
-            int yy = y * getTileHeight();
-            for (int x = 0; x < ltw; x++) {
-                int xx = x * getTileWidth() * 4;
+        for (var y = 0; y < tileHeight; y++) {
+            var yy = y * th;
+            for (var x = 0; x < tileWidth; x++) {
+                var xx = x * tw * 4;
 
-                int tileIndex = gts.tileIndices()[levelIndex][y * level.tileWidth() * numLayers + x * numLayers];
-                byte[] tile = readTile(tileIndex);
+                var tileIndex = gts.tileIndices()[0][(tileY + y) * level.tileWidth() * numLayers + (tileX + x) * numLayers];
+                var tile = readTile(tileIndex);
 
-                for (int ty = 0; ty < getTileHeight(); ty++) {
-                    int totalOffset = (yy + ty) * totalWidth * 4 + xx;
-                    int tileOffset = ty * getTileWidth() * 4;
+                for (var ty = 0; ty < th; ty++) {
+                    var totalOffset = (yy + ty) * totalWidth * 4 + xx;
+                    var tileOffset = ((ty + 8) * getTileWidth() + 8) * 4;
 
-                    System.arraycopy(tile, tileOffset, total, totalOffset, getTileWidth() * 4);
+                    System.arraycopy(tile, tileOffset, total, totalOffset, tw * 4);
                 }
             }
         }
 
-        PngFormat format = new PngFormat(totalWidth, totalHeight, PngColorType.RgbAlpha);
-        try (var out = new PngOutputStream(Files.newOutputStream(Path.of("output.png")), format)) {
+        var format = new PngFormat(totalWidth, totalHeight, PngColorType.RgbAlpha);
+        try (var out = new PngOutputStream(Files.newOutputStream(outputPath), format)) {
             out.writeImage(total);
         }
     }
@@ -71,12 +88,12 @@ public final class Exporter {
     private final Map<String, Gtp> gtpCache = new HashMap<>();
 
     private byte[] readTile(int tileIndex) {
-        GtsFlatTile tile = gts.flatTiles().get(tileIndex & 0xffffff);
-        GtsPageFile pageFile = gts.pageFiles().get(tile.pageIndex());
+        var tile = gts.flatTiles().get(tileIndex & 0xffffff);
+        var pageFile = gts.pageFiles().get(tile.pageIndex());
         var basePath = gts.name().substring(0, gts.name().lastIndexOf('.') - 1);
         var path = basePath + pageFile.name();
         var gtp = gtpCache.computeIfAbsent(path, p -> {
-            ByteBuffer apply = reader.apply(p);
+            var apply = reader.apply(p);
             return Gtp.read(apply);
         });
 
@@ -91,11 +108,11 @@ public final class Exporter {
             FastLz.decompress(chunk.data(), decodeBuffer);
         }
 
-        int parameterBlockIndex = findParameterBlockIndex(chunk);
-        byte[] bytes = gts.parameterBlockData()[parameterBlockIndex];
+        var parameterBlockIndex = findParameterBlockIndex(chunk);
+        var bytes = gts.parameterBlockData()[parameterBlockIndex];
 
-        String codec = bytes.length < 48 ? "BC7" : new String(bytes, 44, 3);
-        BCDecoder bcDecoder = switch (codec) {
+        var codec = bytes.length < 48 ? "BC7" : new String(bytes, 44, 3);
+        var bcDecoder = switch (codec) {
             case "BC5" -> new BC5UDecoder(false);
             case "BC7" -> new BC7Decoder();
             default -> throw new IllegalArgumentException("Unknown codec: " + codec);
@@ -107,7 +124,7 @@ public final class Exporter {
 
     private int findParameterBlockIndex(GtpChunk chunk) {
         var gtsParameterBlocks = gts.parameterBlocks();
-        for (int i = 0; i < gtsParameterBlocks.size(); i++) {
+        for (var i = 0; i < gtsParameterBlocks.size(); i++) {
             if (gtsParameterBlocks.get(i).id() == chunk.parameterId()) {
                 return i;
             }
@@ -126,10 +143,10 @@ public final class Exporter {
 
     private Texture mapTexture(GdexObject object) {
         var name = object.getOne(GdexType.NAME).asString();
-        var width = object.getOne(GdexType.WDTH).asShort();
-        var height = object.getOne(GdexType.HGHT).asShort();
-        var offsetX = object.getOne(GdexType.XXXX).asShort();
-        var offsetY = object.getOne(GdexType.YYYY).asShort();
+        var width = Short.toUnsignedInt(object.getOne(GdexType.WDTH).asShort());
+        var height = Short.toUnsignedInt(object.getOne(GdexType.HGHT).asShort());
+        var offsetX = Short.toUnsignedInt(object.getOne(GdexType.XXXX).asShort());
+        var offsetY = Short.toUnsignedInt(object.getOne(GdexType.YYYY).asShort());
         var address = object.getOne(GdexType.ADDR).asString();
         var srgb = object.getOne(GdexType.SRGB).asIntArray();
         var thumbnail = object.getOne(GdexType.THMB).asGUIDArray();
