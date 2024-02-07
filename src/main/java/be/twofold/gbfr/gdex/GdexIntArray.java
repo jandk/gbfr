@@ -1,4 +1,4 @@
-package be.twofold.gbfr.gts;
+package be.twofold.gbfr.gdex;
 
 public final class GdexIntArray extends Gdex {
     private final int[] values;

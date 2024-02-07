@@ -1,4 +1,4 @@
-package be.twofold.gbfr.gts;
+package be.twofold.gbfr.gdex;
 
 import java.util.*;
 

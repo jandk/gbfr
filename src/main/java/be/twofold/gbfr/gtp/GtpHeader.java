@@ -1,4 +1,4 @@
-package be.twofold.gbfr.gts;
+package be.twofold.gbfr.gtp;
 
 import be.twofold.gbfr.util.*;
 

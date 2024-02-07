@@ -1,6 +1,7 @@
 package be.twofold.gbfr;
 
 import be.twofold.gbfr.data.*;
+import be.twofold.gbfr.exporter.*;
 import be.twofold.gbfr.gts.*;
 
 import java.io.*;
@@ -13,9 +14,9 @@ public class Main {
         // "granite/2k/gts/0/0.gts",
         // "granite/2k/gts/1/1.gts",
         // "granite/2k/gts/2/2.gts",
-        "granite/4k/gts/0/0.gts",
-        "granite/4k/gts/1/1.gts",
-        "granite/4k/gts/2/2.gts"
+//        "granite/4k/gts/0/0.gts",
+        "granite/4k/gts/1/1.gts"
+//        "granite/4k/gts/2/2.gts"
     );
 
     private final Index index;

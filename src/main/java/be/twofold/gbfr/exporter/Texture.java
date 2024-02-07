@@ -1,4 +1,4 @@
-package be.twofold.gbfr.gts;
+package be.twofold.gbfr.exporter;
 
 import java.util.*;
 
@@ -10,6 +10,7 @@ public record Texture(
     int offsetY,
     String address,
     int[] srgb,
-    UUID[] thumbnail
+    UUID[] thumbnail,
+    List<XmlTexture> textures
 ) {
 }
