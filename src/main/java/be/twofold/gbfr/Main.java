@@ -32,9 +32,13 @@ public class Main {
         for (var file : GtsFiles) {
             var buffer = main.readFile(file);
 
-            var gts = Gts.read(buffer);
+            var gts = Gts.read(file, buffer);
+            var exporter = new Exporter(gts, main::readFile);
+            exporter.export();
 
-
+            if (true) {
+                break;
+            }
 
 //            Path path = Path.of(file);
 //            Files.createDirectories(path.getParent());
@@ -53,6 +57,7 @@ public class Main {
     }
 
     private ByteBuffer readFile(String file) {
+        System.out.println("Reading file: " + file);
         var chunkEntry = index.getEntry(file);
         var archive = archives.get(chunkEntry.dataFileNumber());
         return archive.read(chunkEntry);

@@ -17,7 +17,6 @@ public final class Archive implements AutoCloseable {
     }
 
     public ByteBuffer read(ChunkEntry entry) {
-        System.out.println("Reading " + entry.size() + " bytes at " + entry.fileOffset());
         try {
             var buffer = ByteBuffer
                 .allocate(entry.size())

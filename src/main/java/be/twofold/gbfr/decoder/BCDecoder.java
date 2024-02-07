@@ -41,6 +41,10 @@ public abstract class BCDecoder {
         int realHeight = blockHeight * 4;
         int stride = realWidth * bpp;
         byte[] dst = new byte[realWidth * realHeight * bpp];
+        for (int i = 0; i < dst.length; i += 4) {
+            dst[i + 3] = (byte) 0xFF;
+        }
+
         for (int y = 0, srcPos = 0; y < height; y += 4) {
             for (int x = 0; x < width; x += 4, srcPos += bpb) {
                 decodeBlock(src, srcPos, dst, (y * realWidth + x) * bpp, stride);

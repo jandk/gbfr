@@ -5,7 +5,7 @@ import be.twofold.gbfr.*;
 import java.nio.*;
 
 record GtpChunk(
-    int versionMaybe,
+    int compression,
     int magicMaybe,
     int size,
     byte[] data
